@@ -90,13 +90,20 @@ v${OSTICKET_VERSION}/osTicket-v${OSTICKET_VERSION}.zip; \
             https://s3.amazonaws.com/downloads.osticket.com/lang/1.14.x/${lang}.phar; \
         php /tmp/verify-plugin.php "/var/www/html/include/i18n/${lang}.phar"; \
     done
+
+RUN git clone --depth=1 https://github.com/mortbauer/osTicket-plugins.git \
+    && cd osTicket-plugins \
+    && git checkout adapt/foodsoft-doorkeeper \
+    && php -dphar.readonly=0 make.php build auth-oauth2 \
+    && cp auth-oauth2.phar /var/www/html/include/plugins/auth-oauth2.phar
+
 RUN set -ex; \
     \
     for plugin in audit auth-2fa auth-ldap auth-passthru auth-password-policy storage-fs; do \
         wget -q -O /var/www/html/include/plugins/${plugin}.phar \
             https://s3.amazonaws.com/downloads.osticket.com/plugin/${plugin}.phar; \
     done; \
-    for plugin in auth-oauth2 storage-s3; do \
+    for plugin in storage-s3; do \
         wget -q -O /var/www/html/include/plugins/${plugin}.phar \
             https://s3.amazonaws.com/downloads.osticket.com/plugin/1.17.x/${plugin}.phar; \
     done; \
